@@ -88,8 +88,11 @@
     var next = cur === 'dark' ? 'light' : 'dark';
     localStorage.setItem(STORAGE_KEY, next);
 
-    // Bounce the button
-    bounceButton();
+    // Respect prefers-reduced-motion
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Bounce the button (skip if reduced motion)
+    if (!reduce) bounceButton();
 
     // Click coordinates for circular reveal
     var btn = document.getElementById('themeBtn');
@@ -107,9 +110,6 @@
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y)
     );
-
-    // Respect prefers-reduced-motion
-    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // View Transitions API
     if (!reduce && typeof document.startViewTransition === 'function') {
@@ -135,8 +135,8 @@
       return;
     }
 
-    // Fallback for browsers without View Transitions
-    fallbackFlash(next);
+    // Fallback for browsers without View Transitions (skip flash if reduced motion)
+    if (!reduce) fallbackFlash(next);
     applyTheme(next);
   }
 

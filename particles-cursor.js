@@ -145,14 +145,14 @@
       });
 
       // Connection lines between nearby particles
-      for (var i = 0; i < particles.length; i++) {
-        var pi = particles[i];
-        for (var j = i + 1; j < particles.length; j++) {
-          var pj = particles[j];
-          var dx = pi.x - pj.x, dy = pi.y - pj.y;
-          var d = Math.sqrt(dx * dx + dy * dy);
+      for (let i = 0; i < particles.length; i++) {
+        const pi = particles[i];
+        for (let j = i + 1; j < particles.length; j++) {
+          const pj = particles[j];
+          const dx = pi.x - pj.x, dy = pi.y - pj.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
           if (d < MAX_DIST) {
-            var lineA = (1 - d / MAX_DIST) * (isDark ? 0.10 : 0.05);
+            const lineA = (1 - d / MAX_DIST) * (isDark ? 0.10 : 0.05);
             ctx.beginPath();
             ctx.moveTo(pi.x, pi.y);
             ctx.lineTo(pj.x, pj.y);
