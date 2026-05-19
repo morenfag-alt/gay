@@ -122,10 +122,16 @@
     var shockwave = { radius: 0, maxRadius: Math.max(window.innerWidth, window.innerHeight) * 0.6, opacity: 0.8 };
     var flash = { radius: 0, maxRadius: 60, opacity: 1 };
 
+    // Safety net: remove canvas even if rAF is paused (e.g. tab hidden)
+    setTimeout(function () {
+      if (canvas.parentNode) canvas.remove();
+      bigBangActive = false;
+    }, DURATION + 100);
+
     function animate() {
       var elapsed = performance.now() - startTime;
       if (elapsed >= DURATION) {
-        canvas.remove();
+        if (canvas.parentNode) canvas.remove();
         bigBangActive = false;
         return;
       }
@@ -218,10 +224,16 @@
       });
     }
 
+    // Safety net: remove canvas even if rAF is paused (e.g. tab hidden)
+    setTimeout(function () {
+      if (canvas.parentNode) canvas.remove();
+      explosionActive = false;
+    }, DURATION + 100);
+
     function animate() {
       var elapsed = performance.now() - startTime;
       if (elapsed >= DURATION) {
-        canvas.remove();
+        if (canvas.parentNode) canvas.remove();
         explosionActive = false;
         return;
       }

@@ -54,6 +54,7 @@
   }
 
   function spawnGhost(x, y) {
+    if (container.children.length > 20) return;
     var ghost = document.createElement('div');
     ghost.className = 'ghost-trail-item';
 
