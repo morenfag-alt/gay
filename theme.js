@@ -83,14 +83,21 @@
     }, 200);
   }
 
+  var explosionActive = false;
+
   function explosionEffect(x, y) {
+    if (explosionActive) return;
+    explosionActive = true;
+
+    var dpr = window.devicePixelRatio || 1;
     var canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;';
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;width:' + window.innerWidth + 'px;height:' + window.innerHeight + 'px;';
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
     document.body.appendChild(canvas);
 
     var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
     var particles = [];
     var PARTICLE_COUNT = 50;
     var DURATION = 700;
@@ -115,11 +122,12 @@
       var elapsed = performance.now() - startTime;
       if (elapsed >= DURATION) {
         canvas.remove();
+        explosionActive = false;
         return;
       }
 
       var progress = elapsed / DURATION;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       for (var i = 0; i < particles.length; i++) {
         var p = particles[i];
