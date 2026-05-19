@@ -616,7 +616,7 @@
     <div class="test-footer">
       <div class="start-hint" id="startHint">Начните печатать или нажмите <kbd>Tab</kbd> для нового теста</div>
       <button class="restart-btn" onclick="restartTest()" title="Перезапустить (Tab)">
-        <span>↺</span> Заново
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></span> Заново
       </button>
     </div>
   </div>
@@ -625,7 +625,7 @@
 <!-- LEADERBOARD -->
 <section style="max-width:860px;margin:0 auto;padding:0 24px 60px;">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-    <h2 style="font-family:Unbounded,sans-serif;font-size:1.1rem;font-weight:700;">🏆 Таблица лидеров</h2>
+    <h2 style="font-family:Unbounded,sans-serif;font-size:1.1rem;font-weight:700;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Таблица лидеров</h2>
     <div style="display:flex;gap:6px;">
       <button class="opt-btn active" id="lbBtnDay" onclick="switchLb('day',this)">Сегодня</button>
       <button class="opt-btn" id="lbBtnAll" onclick="switchLb('all',this)">Все время</button>
@@ -648,7 +648,7 @@
           <span id="profName" style="font-weight:700;font-size:1.05rem;"></span><span id="profBadge" style="font-size:1rem;"></span>
         </div>
       </div>
-      <button onclick="closeProfile()" style="background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;padding:4px;">✕</button>
+      <button onclick="closeProfile()" style="background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;padding:4px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
     </div>
     <div id="profStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
   </div>
@@ -663,7 +663,7 @@
         <div class="grade-badge" id="gradeBadge">S</div>
         <div class="grade-label" id="gradeLabel">Отличный результат!</div>
       </div>
-      <button class="results-close" onclick="closeResults()">✕</button>
+      <button class="results-close" onclick="closeResults()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
     </div>
 
     <div class="results-grid">
@@ -777,7 +777,7 @@ function updateHeaderUser() {
     <div class="user-info">
       <img class="user-avatar" src="${currentUser.avatar_url || ''}" alt="" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
       <span class="user-name">${currentUser.username || ''}</span>
-      <button class="logout-btn" onclick="logoutTyping()" title="Выйти">✕</button>
+      <button class="logout-btn" onclick="logoutTyping()" title="Выйти"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>
     </div>`;
 }
 
@@ -1955,10 +1955,10 @@ async function openProfile(userId) {
   const regDate = u.created_at ? new Date(u.created_at).toLocaleDateString('ru-RU', {day:'numeric',month:'long',year:'numeric'}) : '—';
 
   document.getElementById('profStats').innerHTML = [
-    ['🏅 Макс. WPM', realMaxWpm + ' wpm'],
-    ['📅 Регистрация', regDate],
-    ['💬 Сообщений', msgCount],
-    ['📋 Шаблонов', tplCount],
+    ['<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg> Макс. WPM', realMaxWpm + ' wpm'],
+    ['<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Регистрация', regDate],
+    ['<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Сообщений', msgCount],
+    ['<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M3 9h18M9 21V9"/></svg> Шаблонов', tplCount],
   ].map(([label, val]) => `
     <div style="background:var(--bg2);border-radius:10px;padding:12px 14px;">
       <div style="font-size:0.75rem;color:var(--text2);margin-bottom:4px;">${label}</div>
