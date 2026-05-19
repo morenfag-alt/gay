@@ -84,6 +84,106 @@
   }
 
   var explosionActive = false;
+  var bigBangActive = false;
+
+  function bigBangEffect(x, y) {
+    if (bigBangActive) return;
+    bigBangActive = true;
+
+    var dpr = window.devicePixelRatio || 1;
+    var canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;width:' + window.innerWidth + 'px;height:' + window.innerHeight + 'px;';
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    document.body.appendChild(canvas);
+
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    var particles = [];
+    var PARTICLE_COUNT = 80;
+    var DURATION = 1200;
+    var startTime = performance.now();
+    var colors = ['#ffffff', '#fffbe6', '#ffd700', '#ffaa00', '#d9a468', '#b0d4ff', '#e0f0ff'];
+
+    for (var i = 0; i < PARTICLE_COUNT; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 3 + Math.random() * 9;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 1.5 + Math.random() * 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: 0.8 + Math.random() * 0.2
+      });
+    }
+
+    var shockwave = { radius: 0, maxRadius: Math.max(window.innerWidth, window.innerHeight) * 0.6, opacity: 0.8 };
+    var flash = { radius: 0, maxRadius: 60, opacity: 1 };
+
+    function animate() {
+      var elapsed = performance.now() - startTime;
+      if (elapsed >= DURATION) {
+        canvas.remove();
+        bigBangActive = false;
+        return;
+      }
+
+      var progress = elapsed / DURATION;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      // Central flash (first 30% of animation)
+      if (progress < 0.3) {
+        var flashProgress = progress / 0.3;
+        flash.radius = flash.maxRadius * flashProgress;
+        flash.opacity = 1 - flashProgress;
+        ctx.beginPath();
+        ctx.arc(x, y, flash.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + flash.opacity + ')';
+        ctx.fill();
+      }
+
+      // Shockwave ring (starts at 10%, fades by 70%)
+      if (progress > 0.1 && progress < 0.7) {
+        var ringProgress = (progress - 0.1) / 0.6;
+        shockwave.radius = shockwave.maxRadius * ringProgress;
+        var ringOpacity = shockwave.opacity * (1 - ringProgress);
+        ctx.beginPath();
+        ctx.arc(x, y, shockwave.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 215, 0, ' + ringOpacity + ')';
+        ctx.lineWidth = 3 * (1 - ringProgress);
+        ctx.stroke();
+
+        // Secondary ring
+        ctx.beginPath();
+        ctx.arc(x, y, shockwave.radius * 0.7, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, ' + (ringOpacity * 0.5) + ')';
+        ctx.lineWidth = 1.5 * (1 - ringProgress);
+        ctx.stroke();
+      }
+
+      // Particles
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05; // slight gravity
+        var alpha = p.opacity * (1 - progress);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (1 - progress * 0.4), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  }
 
   function explosionEffect(x, y) {
     if (explosionActive) return;
@@ -186,19 +286,31 @@
 
       transition.ready.then(function() {
         var goingDark = next === 'dark';
-        if (goingDark) explosionEffect(x, y);
-        document.documentElement.animate(
-          {
-            clipPath: goingDark
-              ? ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)']
-              : ['circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)', 'circle(0px at ' + x + 'px ' + y + 'px)']
-          },
-          {
-            duration: 620,
-            easing: 'cubic-bezier(0.32, 0.72, 0, 1)',
-            pseudoElement: goingDark ? '::view-transition-new(root)' : '::view-transition-old(root)'
-          }
-        );
+        if (goingDark) {
+          explosionEffect(x, y);
+          document.documentElement.animate(
+            {
+              clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)']
+            },
+            {
+              duration: 620,
+              easing: 'cubic-bezier(0.32, 0.72, 0, 1)',
+              pseudoElement: '::view-transition-new(root)'
+            }
+          );
+        } else {
+          bigBangEffect(x, y);
+          document.documentElement.animate(
+            {
+              clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + endRadius + 'px at ' + x + 'px ' + y + 'px)']
+            },
+            {
+              duration: 900,
+              easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+              pseudoElement: '::view-transition-new(root)'
+            }
+          );
+        }
       }).catch(function() {});
       return;
     }
@@ -207,6 +319,7 @@
     if (!reduce) fallbackFlash(next);
     applyTheme(next);
     if (!reduce && next === 'dark') explosionEffect(x, y);
+    if (!reduce && next === 'light') bigBangEffect(x, y);
   }
 
   function bindButton() {
