@@ -1,16 +1,15 @@
 /**
  * particles-cursor.js
- * Лёгкие фоновые частицы (canvas).
- * Кастомный курсор удалён — он мешает доступности и считается AI-tell.
- * Подстраивается под текущий --accent (warm amber) и тему.
+ * Background particles (canvas) + animated wave lines.
+ * Adapts to current --accent color and theme.
  */
 (function () {
   'use strict';
 
-  // На сенсорных устройствах фон-частицы избыточны
+  // Skip on touch devices
   if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
 
-  // Уважаем prefers-reduced-motion
+  // Respect prefers-reduced-motion
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   function initParticles() {
@@ -29,23 +28,29 @@
 
     const ctx = canvas.getContext('2d');
     let W, H, particles, mouse = { x: -9999, y: -9999 };
-    const COUNT = 48;
+    const COUNT = 90;
     const MAX_DIST = 140;
+
+    // Wave configuration
+    const waves = [
+      { amplitude: 30, frequency: 0.008, speed: 0.0004, yOffset: 0.7, opacity: 0.05 },
+      { amplitude: 20, frequency: 0.012, speed: -0.0003, yOffset: 0.75, opacity: 0.04 },
+      { amplitude: 40, frequency: 0.006, speed: 0.0005, yOffset: 0.65, opacity: 0.03 },
+      { amplitude: 15, frequency: 0.015, speed: -0.0006, yOffset: 0.8, opacity: 0.06 },
+    ];
+    let waveTime = 0;
 
     function getAccentRgb() {
       const v = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-      // Пытаемся распарсить hex
       let hex = v.replace('#', '');
       if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
       if (/^[0-9a-f]{6}$/i.test(hex)) {
         const n = parseInt(hex, 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
       }
-      // Пробуем rgb()
       const m = v.match(/(\d+)[,\s]+(\d+)[,\s]+(\d+)/);
       if (m) return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
-      // Дефолт — тёплый amber
-      return [184, 134, 76];
+      return [91, 154, 255];
     }
 
     function resize() {
@@ -79,12 +84,41 @@
       particles = Array.from({ length: COUNT }, createParticle);
     }
 
-    function draw() {
+    function drawWaves(r, g, b, isDark) {
+      // Slight mouse influence on waves
+      const mouseInfluence = (mouse.x > 0 && mouse.x < W) ? (mouse.x / W - 0.5) * 20 : 0;
+
+      waves.forEach(function(wave) {
+        const baseY = H * wave.yOffset;
+        const opacity = isDark ? wave.opacity * 1.2 : wave.opacity;
+
+        ctx.beginPath();
+        ctx.moveTo(0, baseY);
+
+        for (let x = 0; x <= W; x += 4) {
+          const y = baseY + Math.sin(x * wave.frequency + waveTime * wave.speed * 1000) * wave.amplitude
+            + Math.sin(x * wave.frequency * 0.5 + waveTime * wave.speed * 600) * (wave.amplitude * 0.3)
+            + mouseInfluence * Math.sin(x * 0.003);
+          ctx.lineTo(x, y);
+        }
+
+        ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
+
+    function draw(timestamp) {
+      waveTime = timestamp || 0;
       ctx.clearRect(0, 0, W, H);
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
       const [r, g, b] = getAccentRgb();
 
-      particles.forEach(p => {
+      // Draw waves below particles
+      drawWaves(r, g, b, isDark);
+
+      // Draw particles
+      particles.forEach(function(p) {
         p.x += p.vx;
         p.y += p.vy;
         if (p.x < -10) p.x = W + 10;
@@ -110,7 +144,7 @@
         ctx.fill();
       });
 
-      // тонкие линии между близкими частицами
+      // Connection lines between nearby particles
       for (let i = 0; i < particles.length; i++) {
         const pi = particles[i];
         for (let j = i + 1; j < particles.length; j++) {
@@ -133,11 +167,11 @@
     }
 
     window.addEventListener('resize', resize);
-    window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-    window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+    window.addEventListener('mousemove', function(e) { mouse.x = e.clientX; mouse.y = e.clientY; });
+    window.addEventListener('mouseleave', function() { mouse.x = -9999; mouse.y = -9999; });
 
     init();
-    draw();
+    requestAnimationFrame(draw);
   }
 
   if (document.readyState === 'loading') {
