@@ -83,6 +83,65 @@
     }, 200);
   }
 
+  function explosionEffect(x, y) {
+    var canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;';
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    document.body.appendChild(canvas);
+
+    var ctx = canvas.getContext('2d');
+    var particles = [];
+    var PARTICLE_COUNT = 50;
+    var DURATION = 700;
+    var startTime = performance.now();
+    var colors = ['#d9a468', '#e8b783', '#c78d4e', '#f0c996', '#b87a3d'];
+
+    for (var i = 0; i < PARTICLE_COUNT; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 2 + Math.random() * 6;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 2 + Math.random() * 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        opacity: 0.7 + Math.random() * 0.3
+      });
+    }
+
+    function animate() {
+      var elapsed = performance.now() - startTime;
+      if (elapsed >= DURATION) {
+        canvas.remove();
+        return;
+      }
+
+      var progress = elapsed / DURATION;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.12; // gravity
+        var alpha = p.opacity * (1 - progress);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (1 - progress * 0.3), 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = alpha;
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  }
+
   function toggleTheme(event) {
     var cur = getCurrentTheme();
     var next = cur === 'dark' ? 'light' : 'dark';
@@ -119,6 +178,7 @@
 
       transition.ready.then(function() {
         var goingDark = next === 'dark';
+        if (goingDark) explosionEffect(x, y);
         document.documentElement.animate(
           {
             clipPath: goingDark
@@ -138,6 +198,7 @@
     // Fallback for browsers without View Transitions (skip flash if reduced motion)
     if (!reduce) fallbackFlash(next);
     applyTheme(next);
+    if (!reduce && next === 'dark') explosionEffect(x, y);
   }
 
   function bindButton() {
